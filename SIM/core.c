@@ -1182,7 +1182,7 @@ void InfoPrintf(HCORE_51 hCore51,uint8_t* regSet) {
 }
 #endif // _CORE_51_DEBUG
 //int lastP1 = 0;
-int count = 0;
+//int count = 0;
 Core51Err Core51Run(HCORE_51 hCore51) {
 	uint8_t* regSet;/*¼Ä´æÆ÷×é*/
 	uint8_t pcMemByte[4];
@@ -1235,13 +1235,13 @@ Core51Err Core51Run(HCORE_51 hCore51) {
 		}*/
 		
 	//}
-	if (count == 0) {
-		printf("count:%d\r\n", 0);
-	}
-	if (count == 100000000) {
-		printf("count:%d\r\n", count);
-	}
-	count++;
+	//if (count == 0) {
+	//	printf("count:%d\r\n", 0);
+	//}
+	//if (count == 100000000) {
+	//	printf("count:%d\r\n", count);
+	//}
+	//count++;
 	return ERR_NO;
 }
 
