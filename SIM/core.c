@@ -14,10 +14,23 @@
 
 #define CORE_VALIDITY_CHECK() if (hCore51 == NULL) { return ERR_VOID_PTR; }\
 if (hCore51->rom == NULL) { return ERR_VOID_PTR; }
-
+static const uint8_t ParityTable256[256] =
+{
+#   define P2(n) n, n^1, n^1, n
+#   define P4(n) P2(n), P2(n^1), P2(n^1), P2(n)
+#   define P6(n) P4(n), P4(n^1), P4(n^1), P4(n)
+	P6(0), P6(1), P6(1), P6(0)
+};
 /*根据ACC中的值更新P*/
  void _INLINE_ Core51UpdateP(HCORE_51 hCore51) {
-	uint8_t acc = _ACC_(hCore51);
+
+	 if (ParityTable256[_ACC_(hCore51)]) {
+		 _SetP_(hCore51);
+	 }
+	 else {
+		 _ClrP_(hCore51);
+	 }
+	/*uint8_t acc = _ACC_(hCore51);
 	uint8_t i = 0;
 	uint8_t count = 0;
 	for (i = 0; i < 8; i++) {
@@ -30,7 +43,7 @@ if (hCore51->rom == NULL) { return ERR_VOID_PTR; }
 	}
 	else {
 		_ClrP_(hCore51);
-	}
+	}*/
 }
 #define _UPDATE_OV(sum) if ((((sum)) > 0x7f) || (((sum)) < -0x80)){ _SetOV_(hCore51); }else{  _ClrOV_(hCore51);}
 #define _UPDATE_C(sum) if ((sum) > 0xff){ _SetC_(hCore51);} else{ _ClrC_(hCore51);}
@@ -297,21 +310,6 @@ if (hCore51->rom == NULL) { return ERR_VOID_PTR; }
  { Core51MOV_A2R,1},//FF
  };
  
-void Core51ADDUpdateOV(HCORE_51 hCore51,uint8_t a,uint8_t b,uint8_t res) {
-	/*一整一负相加不可能溢出*/
-	/*正正相加可能溢出*/
-	if (!(a & 0x80) && !(b & 0x80) && (res & 0x80)) {
-		/*溢出了*/
-		_SetOV_(hCore51);
-	}
-	else if ((a & 0x80) && (b & 0x80) && !(res & 0x80)) {
-		/*溢出了*/
-		_SetOV_(hCore51);
-	}
-	else {
-		_ClrOV_(hCore51);
-	}
-}
 /*获取寄存器组，根据PSW[3-4]*/
 uint8_t _INLINE_ * Core51GetRegSet(HCORE_51 hCore51) {
 
@@ -1067,8 +1065,30 @@ void Core51SETB_C(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //DA A D4 A的十进制加法调整 
 void Core51DA_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	/*zhangzheng 这个还没有实现*/
+	register int16_t temp;
+	register uint8_t A;
+	temp = A = _ACC_(hCore51);
+	if ((A & 0xf) > 9 || _GetAC_(hCore51)) {
 
+		temp += 0x6;
+		/*低四位大于9，加上6，AC肯定溢出*/
+		_SetAC_(hCore51);
+		if (temp > 255) {/*溢出了*/
+			_SetC_(hCore51);
+		}
+		A = temp;
+		temp = A;
+	}
+
+	if ((A >> 4) > 9 || _GetC_(hCore51)) {	
+		temp += 0x6 << 4;
+	
+		if (temp > 255) {/*溢出了*/
+			_SetC_(hCore51);
+		}
+		A = temp;
+	}
+	_ACC_(hCore51) = A;
 	Core51UpdateP(hCore51);/*更新P标志位*/
 }
 //DJNZ dircet, rel D5 dircet rel 直接字节减1，不为零则转移 3字节
@@ -1180,7 +1200,7 @@ void InfoPrintf(HCORE_51 hCore51,uint8_t* regSet) {
 	printf("R5:%x\t",regSet[5]);
 	printf("R6:%x\t",regSet[6]);
 	printf("R7:%x\t",regSet[7]);
-	printf("SP:%x\r\n",_PSW_(hCore51));
+	printf("PSW:%x\r\n",_PSW_(hCore51));
 	printf("ACC:%x\t",_ACC_(hCore51));
 	printf("SP:%x\t",_SP_(hCore51));
 	printf("PC:%x\r\n",_GetPC(hCore51));

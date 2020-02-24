@@ -709,7 +709,27 @@ uint8_t Core51MUL_AB_test(HCORE_51 hCore51, uint8_t* regSet, uint16_t index) {
 		return 0;
 	}
 }
+uint8_t Core51DA_A_test(HCORE_51 hCore51, uint8_t* regSet, uint16_t index) {
+	uint8_t pcMemByte[4];
+	pcMemByte[0] = index;
+	_GetPC(hCore51) = 0;
+	_SP_(hCore51) = 0;
+	_ACC_(hCore51) = (uint8_t)(0xC9);
+	_B_(hCore51) = 100;
+	_PSW_(hCore51) = 0x00;
 
+	_GetDateMem(hCore51)[0x2A] = (uint8_t)(0x00);
+
+	instrTable[index].instrRunFuntion(hCore51, regSet, pcMemByte);
+	_DEBUG("%s\t×Ö½ÚÊý:%d\tflag:%d\r\n", __FUNCTION__, instrTable[index].bytes, instrTable[index].flag);
+	if (_ACC_(hCore51)== 0x29 && _GetC_(hCore51)
+		) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
 TestFun testFun[] = {
 	nop_test,
 	AJMP_test,
@@ -837,7 +857,7 @@ void testRun(void) {
 	uint8_t	exRAM[2048];
 	Core51Init(&Core51, NULL, exRAM);
 	regSet = Core51GetRegSet(&Core51);
-	if (regSet == NULL) { return ERR_GET_SEG_SET; }
+	if (regSet == NULL) { return ; }
 	for (i = 0; i < testFunLen; i++) {
 		if (testFun[i] != NULL) {
 			if (testFun[i](&Core51, regSet, i) == 0) {
@@ -873,6 +893,12 @@ void testRun(void) {
 		//printf("²âÊÔ³É¹¦\r\n");
 	}
 	if (Core51MUL_AB_test(&Core51, regSet, 0xA4) == 0) {
+		printf("²âÊÔÊ§°Ü\r\n");
+	}
+	else {
+		//printf("²âÊÔ³É¹¦\r\n");
+	}
+	if (Core51DA_A_test(&Core51, regSet, 0xD4) == 0) {
 		printf("²âÊÔÊ§°Ü\r\n");
 	}
 	else {
