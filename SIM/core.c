@@ -50,7 +50,6 @@ static const uint8_t ParityTable256[256] =
 #define _UPDATE_AC(sum) if ((sum) > 0xf){ _SetAC_(hCore51);} else{ _ClrAC_(hCore51);}
 
 
-
  const InstrTable instrTable[] = {
  { Core51NOP ,1},/*00*/
  { Core51AJMP_ADDR,2,1},/*01*/
@@ -357,10 +356,20 @@ void Core51INC_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //INC dircet 05 dircet 直接字节加1 2字节
 void Core51INC_D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]]++;
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //INC @Ri 06~07 间接RAM加1
 void Core51INC_SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]]++;
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //INC Rn 08~0F 寄存器加1
 void Core51INC_R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -423,10 +432,20 @@ void Core51DEC_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //DEC dircet 15 dircet 直接字节减1 双字节
 void Core51DEC_D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]]--;
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //DEC @Ri 16~17 间接RAM减1
 void Core51DEC_SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]]--;
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //DEC Rn 18~1F 寄存器减1
 void Core51DEC_R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -567,10 +586,20 @@ void Core51JC(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //ORL dircet, A 42 dircet A“或”到直接字节 2字节
 void Core51ORL_DA(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] |= _ACC_(hCore51);
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //ORL dircet, #data 43 dircet data 立即数“或”到直接字节 3字节
 void Core51ORL_DSD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] |= pcMemByte[2];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //ORL A, #data 44 data 立即数“或”到A 2字节
 void Core51ORL_ASD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -601,10 +630,20 @@ void Core51JNC(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //ANL dircet A 52 dircet A“与”到直接字节 2字节
 void Core51ANL_DA(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] &= _ACC_(hCore51);
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //ANL dircet, #data 53 dircet data 立即数“与”到直接字节
 void Core51ANL_DSD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] &= pcMemByte[2];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //ANL A, #data 54 data 立即数“与”到A 2字节
 void Core51ANL_ASD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -635,10 +674,20 @@ void Core51JZ(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //XRL dircet A 62 dircet A“异或”到直接字节 2字节
 void Core51XRL_DA(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] ^= _ACC_(hCore51);
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //XRL dircet, #data 63 dircet data 立即数“异或”到直接字节 3字节
 void Core51XRL_DSD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] ^= pcMemByte[2];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //XRL A, #data 64 data 立即数“异或”到A 2字节
 void Core51XRL_ASD(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -697,10 +746,20 @@ void Core51MOV_SD2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //MOV dircet, #data 75 dircet data 立即数送直接字节 三字节
 void Core51MOV_SD2D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] = pcMemByte[2];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV @Ri,#data 76~77 data 立即数送间接RAM 两字节
 void Core51MOV_SD2SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]] = pcMemByte[1];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV Rn, #data 78~7F data 立即数送寄存器 双字节
 void Core51MOV_SD2R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -752,14 +811,29 @@ void Core51DIV_AB(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //MOV dircet1, dircet2 85 dircet1 dircet2 直接字节送直接字节 三字节
 void Core51MOV_D2D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[2]] = _GetDateMem(hCore51)[pcMemByte[1]];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[2], _INTER_ADDR);
+	}
+#endif
 }
 //MOV dircet, @Ro 86~87 间接RAM送直接字节 双字节
 void Core51MOV_SR2D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] = _GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV dircet, Rn 88~8F dircet 寄存器送直接字节 双字节
 void Core51MOV_R2D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] = regSet[pcMemByte[0] & 0x7];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV DPTR, #data16 90 data 15~8 16位常数送数据指针 data7~0
 void Core51MOV_SD162DPTR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -892,6 +966,11 @@ void Core51MUL_AB(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //MOV @Ri,direct A6~A7 direct 间接RAM送间接RAM  两字节
 void Core51MOV_D2SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]] = _GetDateMem(hCore51)[pcMemByte[1]];
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV Rn, dircet A8~AF dircet 直接字节送寄存器 双字节
 void Core51MOV_D2R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1036,6 +1115,11 @@ void Core51XCH_ASR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_ACC(_GetDateMem(hCore51)) = _GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]];
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]] = temp;
 	Core51UpdateP(hCore51);
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //XCH A, Rn C8~CF 交换A和寄存器
 void Core51XCH_AR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1049,6 +1133,11 @@ void Core51XCH_AR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 void Core51POP_D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] = _GetDateMem(hCore51)[_SP(_GetDateMem(hCore51))];
 	_SP(_GetDateMem(hCore51))--;
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //SETB bit; 1→bit, 置位某一位 D2 2字节
 void Core51SETB_bit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1069,7 +1158,6 @@ void Core51DA_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	register uint8_t A;
 	temp = A = _ACC_(hCore51);
 	if ((A & 0xf) > 9 || _GetAC_(hCore51)) {
-
 		temp += 0x6;
 		/*低四位大于9，加上6，AC肯定溢出*/
 		_SetAC_(hCore51);
@@ -1082,7 +1170,6 @@ void Core51DA_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 
 	if ((A >> 4) > 9 || _GetC_(hCore51)) {	
 		temp += 0x6 << 4;
-	
 		if (temp > 255) {/*溢出了*/
 			_SetC_(hCore51);
 		}
@@ -1097,6 +1184,11 @@ void Core51DJNZ_Dr(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	if (_GetDateMem(hCore51)[pcMemByte[1]]) {
 		_GetPC(hCore51) += (int8_t)pcMemByte[2];
 	}
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //XCHD A, @Ri D6~D7 交换A和间接RAM的低位 
 void Core51XCHD_ASR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1110,6 +1202,12 @@ void Core51XCHD_ASR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_ACC(_GetDateMem(hCore51)) &= 0xf;
 	_ACC(_GetDateMem(hCore51)) |= temp1;
 	Core51UpdateP(hCore51);
+
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 // DJNZ Rn, rel D8~DF rel 寄存器减1，不为零则转移 2字节
 void Core51DJNZ_Rr(HCORE_51 hCore51, uint8_t * regSet, uint8_t * pcMemByte) {
@@ -1153,10 +1251,20 @@ void Core51MOV_R2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //MOVX @DPTR,A F0 A送外部数据（16位地址） 1字节
 void Core51MOVX_A2SDPTR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetExDateMem(hCore51)[_DPTR_(hCore51)] = _ACC(_GetDateMem(hCore51));
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, _DPTR_(hCore51), _EX_ADDR);
+	}
+#endif
 }
 //MOVX @Ri,A F2~F3 A送外部数据（8位地址）1字节
 void Core51MOVX_A2SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetExDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]] = _ACC(_GetDateMem(hCore51));
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
 //CPL A F4 A取反
 void Core51CPL_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1166,11 +1274,22 @@ void Core51CPL_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 //MOV dircet, A F5 dircet A送直接字节 双字节
 void Core51MOV_A2D(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[pcMemByte[1]] = _ACC(_GetDateMem(hCore51));
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _INTER_ADDR);
+	}
+#endif
 }
 //MOV @Ri,A F6~F7 A送间接RAM
 void Core51MOV_A2SR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	_GetDateMem(hCore51)[regSet[pcMemByte[0] & 0x1]] = _ACC(_GetDateMem(hCore51));
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, regSet[pcMemByte[0] & 0x1], _INTER_ADDR);
+	}
+#endif
 }
+
 /*MOV Rn, A F8~FF A送寄存器*/
 void Core51MOV_A2R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	regSet[pcMemByte[0] & 0x7] = _ACC(_GetDateMem(hCore51));
@@ -1182,7 +1301,7 @@ void Core51Init(HCORE_51 hCore51,uint8_t *rom,uint8_t* exMem) {
 	memset(hCore51->dataMem, 0, sizeof(hCore51->dataMem));
 	hCore51->rom = rom;
 	hCore51->exDateMem = exMem;
-
+	hCore51->core51WDetectCb = 0x00;
 	_SP_(hCore51) = 0x07;
 	_P0_(hCore51) = 0xFF;
 	_P1_(hCore51) = 0xFF;

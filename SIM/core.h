@@ -9,13 +9,24 @@
 #include <stdint.h>
 #include <string.h>
 
-#define _CORE_51_DEBUG	0
+#define _CORE_51_DEBUG			0	/*是否开启调试*/
+
+#define _CORE_51_WRITE_DETECT	1	/*开启内存写入探查*/
+#define _INTER_ADDR				0
+#define _EX_ADDR				1
+
+#if _CORE_51_WRITE_DETECT
+typedef void (*Core51WDetectFunction)(void* hObject, uint16_t addr, uint8_t flag);
+#endif
 
 typedef struct {
-	uint16_t	PC;				/*PC寄存器*/
-	uint8_t		dataMem[0xFF];	/*数据存储器*/
-	uint8_t*	exDateMem;		/*外部数据存储单元*/
-	uint8_t*	rom;			/*rom指针指向被运行的ROM*/
+	uint16_t	PC;							/*PC寄存器*/
+	uint8_t		dataMem[0xFF];				/*数据存储器*/
+	uint8_t*	exDateMem;					/*外部数据存储单元*/
+	uint8_t*	rom;						/*rom指针指向被运行的ROM*/
+#if _CORE_51_WRITE_DETECT
+	Core51WDetectFunction core51WDetectCb;	/*写入探查函数*/
+#endif
 }*HCORE_51,CORE_51;
 
 typedef enum {
@@ -24,6 +35,7 @@ typedef enum {
 	ERR_NO=2,
 }Core51Err;
 
+/*指令表*/
 typedef void (*InstrRunFuntion)(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte);
 typedef struct {
 	InstrRunFuntion instrRunFuntion;
@@ -32,14 +44,19 @@ typedef struct {
 }InstrTable;
 
 
+
+/*获取ROM*/
 #define _GetRom(a)			((a)->rom)
+/*获取PC*/
 #define	_GetPC(a)			((a)->PC)
 /*获取寄存器区域*/
 #define _GetDateMem(a)		((a)->dataMem)
 /*获取拓展内存区域*/
 #define _GetExDateMem(a)	((a)->exDateMem)
 
+/*获取ROM中相对PC的偏移*/
 #define _ROM_GET_BYTE(a,b)	_GetRom((a))[_GetPC((a))+(b)]
+/*PC地址加上num*/
 #define _PC_ADD_NUM(a,num) ((a)->PC+=(num))
 
  /*获取00-7f的位逻辑值*/
