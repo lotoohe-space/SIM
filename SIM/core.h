@@ -14,6 +14,7 @@
 #define _CORE_51_WRITE_DETECT	1	/*开启内存写入探查*/
 #define _INTER_ADDR				0
 #define _EX_ADDR				1
+#define _BIT_ADDR				2
 
 #if _CORE_51_WRITE_DETECT
 typedef void (*Core51WDetectFunction)(void* hObject, uint16_t addr, uint8_t flag);
@@ -64,6 +65,10 @@ typedef struct {
 /*得到80H-F7H的某一位*/
 #define _GET_HIGHT_ADDR_BIT(a,b) ((_GetDateMem(a)[(((uint8_t)(b[1] >> 3)) << 3)]) & ((1 << (b[1] % 8))))
 
+#define _GET_BIT_ADDR_VAL(a,b)	(((b) >= 0x00 && (b) <= 0x7f)?\
+((((uint8_t)b) >> 3) + 0x20):(((uint8_t)((b) >> 3)) << 3))
+
+#define _GET_BIT_ADDR_INDEX(a)	((a) % 8)
 
 /*获取寄存器中的值*/
 #define _B(a)		(*((a)+0xF0))/*获得B的值*/
@@ -199,6 +204,7 @@ typedef struct {
 
 #define _SET_BIT(a,b) ((a)|=(1<<(b)))
 #define _CLR_BIT(a,b) ((a)&=~(1<<(b)))
+#define _GET_BIT(a,b) (((a)>>(b))&0x1)
 /*检测最高位，如果为1，则转换为int8_t 否则，uint8_t*/
 #define _S_CK_TRAN(a) ((a)&0x80?(int8_t)(a):(uint8_t)(a))
 

@@ -859,6 +859,11 @@ void Core51MOV_bitC(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 			_CLR_BIT(_GetDateMem(hCore51)[(((pcMemByte[1] >> 3)) << 3)], pcMemByte[1] % 8);
 		}
 	}
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _BIT_ADDR);
+	}
+#endif
 
 }
 //MOVC A, @A+DPTR 93 由((A)+(DPTR))寻址的程序存贮器字节选A
@@ -995,6 +1000,7 @@ void Core51ANL_Cnbit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 		}
 	}
 }
+
 //CPL bit B2 直接位取反 2字节
 void Core51CPL_bit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	if (pcMemByte[1] >= 0x00 && pcMemByte[1] <= 0x7f) {
@@ -1014,6 +1020,11 @@ void Core51CPL_bit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 		}
 
 	}
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _BIT_ADDR);
+	}
+#endif
 }
 //CPL C B3 进位取反
 void Core51CPL_C(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1086,6 +1097,11 @@ void Core51CLR_bit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	else {
 		_CLR_BIT(_GetDateMem(hCore51)[(((uint8_t)(pcMemByte[1] >> 3)) << 3)], pcMemByte[1] % 8);
 	}
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _BIT_ADDR);
+	}
+#endif
 }
 //CLR C C3 清零
 void Core51CLR_C(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
@@ -1147,6 +1163,11 @@ void Core51SETB_bit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	else {
 		_SET_BIT(_GetDateMem(hCore51)[(((pcMemByte[1] >> 3)) << 3)], pcMemByte[1] % 8);
 	}
+#if _CORE_51_WRITE_DETECT
+	if (hCore51->core51WDetectCb) {
+		hCore51->core51WDetectCb((HCORE_51)hCore51, pcMemByte[1], _BIT_ADDR);
+	}
+#endif
 }
 //SETB C; 1→CY, 置位CY D3 
 void Core51SETB_C(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
