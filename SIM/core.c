@@ -1,5 +1,5 @@
 /*
-*date:2020/2/23
+*date:2020/2/23jmp
 *author:zspace
 *email:1358745329@qq.com
 */
@@ -101,7 +101,7 @@ static const uint8_t ParityTable256[256] =
  { Core51ADD_AaddR,1},//2F
  { Core51JNB,3,1},
  { Core51ACALL,2,1},//31
- { Core51RETI,1},
+ { Core51RETI,1,1},
  { Core51RLC_A,1},
  { Core51ADDC_AaddSD,2},
  { Core51ADDC_AaddD,2},
@@ -166,7 +166,7 @@ static const uint8_t ParityTable256[256] =
  { Core51JNZ,2,1},//70
  { Core51ACALL,2,1},//71
  { Core51ORL_Cbit,2},
- { Core51JMP_AaddrDPTR,1},
+ { Core51JMP_AaddrDPTR,1,1},
  { Core51MOV_SD2A,2},
  { Core51MOV_SD2D,3},
  { Core51MOV_SD2SR,2},//76
@@ -426,7 +426,7 @@ void Core51RRC_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //DEC A 14 A减1 
 void Core51DEC_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	_ACC(_GetDateMem(hCore51))--;
+	_ACC_(hCore51)--;
 	Core51UpdateP(hCore51);/*更新P标志位*/
 }
 //DEC dircet 15 dircet 直接字节减1 双字节
@@ -455,12 +455,12 @@ void Core51DEC_R(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 void Core51JB(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	if (pcMemByte[1] >= 0x00 && pcMemByte[1] <= 0x7f) {
 		if (_GET_LOW_ADDR_BIT(hCore51, pcMemByte)) {
-			_GetPC(hCore51) += pcMemByte[2];
+			_GetPC(hCore51) += (int8_t)pcMemByte[2];
 		}
 	}
 	else {
 		if (_GET_HIGHT_ADDR_BIT(hCore51, pcMemByte)) {
-			_GetPC(hCore51) += pcMemByte[2];
+			_GetPC(hCore51) += (int8_t)pcMemByte[2];
 		}
 	}
 
@@ -551,11 +551,11 @@ void Core51RLC_A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 void _INLINE_ Core51ADDC_BASE(HCORE_51 hCore51, uint8_t a, uint8_t b, uint8_t* res) {
 	register int16_t sum;
 
-	sum = (int16_t)((int8_t)a) + (int16_t)((int8_t)b) + _GetC_(hCore51);
+	sum = (int16_t)((int8_t)a) + (int16_t)((int8_t)b) + (_GetC_(hCore51) ? 1 : 0);
 	_UPDATE_OV(sum); /*溢出计算*/
-	sum = (a & 0xf) + (b & 0xf) + _GetC_(hCore51);
+	sum = (a & 0xf) + (b & 0xf) + (_GetC_(hCore51) ? 1 : 0);
 	_UPDATE_AC(sum);/*半进位*/
-	sum = a + b + _GetC_(hCore51);
+	sum = a + b + (_GetC_(hCore51) ? 1 : 0);
 	_UPDATE_C(sum);/*进位*/
 	*res = sum;
 
@@ -790,7 +790,7 @@ void Core51ANL_Cbit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //MOVC A, @A+PC 83 由((A)+(PC))；寻址的程序存贮器字节送A 该指令需要PC先+1
 void Core51MOVC_SAaddPC2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	_ACC(_GetDateMem(hCore51)) = _GetRom(hCore51)[_ACC(_GetDateMem(hCore51)) + _GetPC(hCore51)];
+	_ACC_(hCore51) = _GetRom(hCore51)[_ACC_(hCore51) + _GetPC(hCore51)];
 	Core51UpdateP(hCore51); 
 }
 //DIV AB 84 A除以B
@@ -805,7 +805,7 @@ void Core51DIV_AB(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	else {
 		_SetOV_(hCore51);/*除数为0*/
 	}
-
+	_ClrC_(hCore51);
 	Core51UpdateP(hCore51);/*更新P标志位*/
 }
 //MOV dircet1, dircet2 85 dircet1 dircet2 直接字节送直接字节 三字节
@@ -868,23 +868,23 @@ void Core51MOV_bitC(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //MOVC A, @A+DPTR 93 由((A)+(DPTR))寻址的程序存贮器字节选A
 void Core51MOVC_SAaddDPRT2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	_ACC(_GetDateMem(hCore51)) = _GetRom(hCore51)[_ACC(_GetDateMem(hCore51)) + _DPTR(_GetDateMem(hCore51))];
+	_ACC_(hCore51) = _GetRom(hCore51)[_ACC_(hCore51) + _DPTR_(hCore51)];
 	Core51UpdateP(hCore51);
 }
 void _INLINE_ Core51SUBB_BASE(HCORE_51 hCore51, uint8_t a, uint8_t b, uint8_t* res) {
 	register int16_t sum;
 
-	sum = (int16_t)((int8_t)a) - (int16_t)((int8_t)b) -_GetC_(hCore51);
+	sum = (int16_t)((int8_t)a) - (int16_t)((int8_t)b) - (_GetC_(hCore51) ? 1 : 0);
 	_UPDATE_OV(sum); /*溢出计算*/
-	sum = (a & 0xf) - (b & 0xf) - _GetC_(hCore51);
+	sum = (a & 0xf) - (b & 0xf) - (_GetC_(hCore51) ? 1 : 0);
 	//_UPDATE_AC(sum);/*半进位*/
 	if ((sum) <0) { _SetAC_(hCore51); }
 	else { _ClrAC_(hCore51); }
-	sum = a - b - _GetC_(hCore51);
+	sum = a - b - (_GetC_(hCore51) ? 1 : 0);
 	//_UPDATE_C(sum);/*进位*/
 	if ((sum) < 0) { _SetC_(hCore51); }
 	else { _ClrC_(hCore51); }
-	*res = sum;
+	*res = (int8_t)sum;
 
 	Core51UpdateP(hCore51);/*更新P标志位*/
 }
@@ -947,8 +947,8 @@ void Core51MOV_Cbit(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //INC DPTR A3 数据指针加1
 void Core51INC_DPTR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	uint16_t dptrAdd;
-	dptrAdd = _DPTR(_GetDateMem(hCore51)) + 1;
+	register uint16_t dptrAdd;
+	dptrAdd = _DPTR_(hCore51) + 1;
 	_DPL(_GetDateMem(hCore51)) = (dptrAdd) & 0xff;
 	_DPH(_GetDateMem(hCore51)) = (dptrAdd >> 8) & 0xff;
 }
@@ -965,7 +965,7 @@ void Core51MUL_AB(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 	else {
 		_ClrOV_(hCore51);
 	}
-
+	_ClrC_(hCore51);
 	Core51UpdateP(hCore51);/*更新P标志位*/
 }
 //MOV @Ri,direct A6~A7 direct 间接RAM送间接RAM  两字节
@@ -1239,9 +1239,7 @@ void Core51DJNZ_Rr(HCORE_51 hCore51, uint8_t * regSet, uint8_t * pcMemByte) {
 }
 //MOVX A, @DPTR E0 送外部数据（16位地址）送A 1字节
 void Core51MOVX_SDPTR2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	_ACC(_GetDateMem(hCore51)) = _GetExDateMem(hCore51)[
-		_DPTR_(hCore51)
-	];
+	_ACC_(hCore51) = _GetExDateMem(hCore51)[_DPTR_(hCore51)];
 	Core51UpdateP(hCore51);
 }
 //MOVX A, @Ri E2~E3 送外部数据（8位地址）送A 1字节
@@ -1271,7 +1269,7 @@ void Core51MOV_R2A(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
 }
 //MOVX @DPTR,A F0 A送外部数据（16位地址） 1字节
 void Core51MOVX_A2SDPTR(HCORE_51 hCore51, uint8_t* regSet, uint8_t* pcMemByte) {
-	_GetExDateMem(hCore51)[_DPTR_(hCore51)] = _ACC(_GetDateMem(hCore51));
+	_GetExDateMem(hCore51)[_DPTR_(hCore51)] = _ACC_(hCore51);
 #if _CORE_51_WRITE_DETECT
 	if (hCore51->core51WDetectCb) {
 		hCore51->core51WDetectCb((HCORE_51)hCore51, _DPTR_(hCore51), _EX_ADDR);
@@ -1393,7 +1391,10 @@ Core51Err Core51Run(HCORE_51 hCore51) {
 	}
 	InfoPrintf(hCore51, regSet);
 #endif
-	
+	if (_GetPC(hCore51) == 0X3a56) {
+
+		printf("halt:%x\r\n", _GetPC(hCore51));
+	}
 	//if (_GetPC(hCore51)<0x896&& _GetPC(hCore51) >0x8b5) {
 	/*	if (_P1_(hCore51) != 0xff && lastP1!= _P1_(hCore51)) {
 			printf("P1:%x\r\n", _P1_(hCore51));

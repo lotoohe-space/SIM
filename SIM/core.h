@@ -108,7 +108,7 @@ typedef struct {
 
 
 #define _DPTR(a)	((_DPH(a)<<8)|_DPL(a))
-#define _DPTR_(a)	((_DPH(_GetDateMem(a))<<8)|_DPL(_GetDateMem(a)))
+#define _DPTR_(a)	(((_DPH(_GetDateMem(a)))<<8)|(_DPL(_GetDateMem(a))))
 
 /*获取PSW中的各位*/
 #define _GetC(a)	((a)&0x80)
